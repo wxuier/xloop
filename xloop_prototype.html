@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLoop知识库管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        /* 主布局 */
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 24px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 0 24px 32px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            fill: currentColor;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            background: white;
+            padding: 16px 32px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* 搜索框 */
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+        }
+
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        /* 卡片网格 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .knowledge-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .knowledge-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .card-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .card-type.faq {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .card-type.document {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .card-type.manual {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .card-menu {
+            position: relative;
+        }
+
+        .menu-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+
+        .card-description {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            padding: 4px 8px;
+            background: #f3f4f6;
+            color: #374151;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        /* 表格样式 */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 24px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .table tr:hover {
+            background: #f9fafb;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: #f3f4f6;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* 类型选择器 */
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .type-option {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .type-option:hover {
+            border-color: #2563eb;
+        }
+
+        .type-option.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .type-icon {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto 8px;
+            color: #6b7280;
+        }
+
+        .type-option.selected .type-icon {
+            color: #2563eb;
+        }
+
+        /* 上传区域 */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 48px 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            color: #9ca3af;
+        }
+
+        /* 状态指示器 */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-indicator.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-indicator.inactive {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                z-index: 999;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            .top-bar {
+                padding: 16px;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                width: 200px;
+            }
+        }
+
+        /* 隐藏内容区域 */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: #d1d5db;
+        }
+
+        /* 加载状态 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #2563eb;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="logo">XLoop</a>
+            </div>
+            <div class="nav-menu">
+                <a href="#" class="nav-item active" data-section="knowledge-list">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                    知识库列表
+                </a>
+                <a href="#" class="nav-item" data-section="document-management">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    基础文档管理
+                </a>
+                <a href="#" class="nav-item" data-section="faq-management">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,10.25 15.56,11.42 14.83,12.15L15.07,11.25M11,19H13V17H11V19Z"/>
+                    </svg>
+                    FAQ管理
+                </a>
+                <a href="#" class="nav-item" data-section="manual-management">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6Z"/>
+                    </svg>
+                    产品手册管理
+                </a>
+                <a href="#" class="nav-item" data-section="user-management">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M16,4C18.21,4 20,5.79 20,8C20,10.21 18.21,12 16,12C13.79,12 12,10.21 12,8C12,5.79 13.79,4 16,4M16,14C20.42,14 24,15.79 24,18V20H8V18C8,15.79 11.58,14 16,14Z"/>
+                    </svg>
+                    用户管理
+                </a>
+            </div>
+        </nav>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-bar">
+                <h1 class="page-title" id="pageTitle">知识库列表</h1>
+                <div class="top-actions">
+                    <div class="search-box">
+                        <svg class="search-icon" viewBox="0 0 24 24">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        <input type="text" class="search-input" placeholder="搜索知识库..." id="searchInput">
+                    </div>
+                    <button class="btn btn-primary" id="createBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        新建知识库
+                    </button>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <!-- 知识库列表 -->
+                <section class="content-section active" id="knowledge-list">
+                    <div class="card-grid" id="knowledgeGrid">
+                        <!-- 知识库卡片将通过JavaScript动态生成 -->
+                    </div>
+                </section>
+
+                <!-- 基础文档管理 -->
+                <section class="content-section" id="document-management">
+                    <div class="upload-area" id="uploadArea">
+                        <svg class="upload-icon" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                        <h3>拖拽文件到此处上传</h3>
+                        <p>支持 PDF、PPT、CSV、MP3 等格式</p>
+                        <button class="btn btn-primary" style="margin-top: 16px;">选择文件</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="selectAll">
+                                    </th>
+                                    <th>文件名</th>
+                                    <th>描述</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentTable">
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>产品手册.pdf</td>
+                                    <td>XLoop产品功能说明文档</td>
+                                    <td><span class="status-indicator active">已处理</span></td>
+                                    <td>2023-10-16 14:30</td>
+                                    <td>
+                                        <button class="btn btn-secondary">预览切片</button>
+                                        <button class="btn btn-secondary">删除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>用户指南.docx</td>
+                                    <td>系统使用指南文档</td>
+                                    <td><span class="status-indicator active">已处理</span></td>
+                                    <td>2023-10-15 09:15</td>
+                                    <td>
+                                        <button class="btn btn-secondary">预览切片</button>
+                                        <button class="btn btn-secondary">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- FAQ管理 -->
+                <section class="content-section" id="faq-management">
+                    <div style="margin-bottom: 24px;">
+                        <button class="btn btn-primary">添加FAQ</button>
+                        <button class="btn btn-secondary">批量导入</button>
+                        <button class="btn btn-secondary">导出</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>问题</th>
+                                    <th>答案</th>
+                                    <th>状态</th>
+                                    <th>更新时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>如何创建新的知识库？</td>
+                                    <td>点击右上角的"新建知识库"按钮，选择知识库类型...</td>
+                                    <td><span class="status-indicator active">启用</span></td>
+                                    <td>2023-10-16 10:20</td>
+                                    <td>
+                                        <button class="btn btn-secondary">编辑</button>
+                                        <button class="btn btn-secondary">禁用</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>支持哪些文件格式？</td>
+                                    <td>系统支持PDF、PPT、CSV、MP3等多种格式...</td>
+                                    <td><span class="status-indicator active">启用</span></td>
+                                    <td>2023-10-15 16:45</td>
+                                    <td>
+                                        <button class="btn btn-secondary">编辑</button>
+                                        <button class="btn btn-secondary">禁用</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 产品手册管理 -->
+                <section class="content-section" id="manual-management">
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+                        <div>
+                            <h3 style="margin-bottom: 16px;">产品列表</h3>
+                            <div style="background: white; border-radius: 12px; padding: 24px;">
+                                <div style="margin-bottom: 16px;">
+                                    <button class="btn btn-primary">添加产品</button>
+                                </div>
+                                <div class="product-list">
+                                    <div class="product-item" style="padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; cursor: pointer;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span>XLoop知识库系统</span>
+                                            <span class="status-indicator active">使用中</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-item" style="padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; cursor: pointer;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span>智能客服系统</span>
+                                            <span class="status-indicator inactive">停用中</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 style="margin-bottom: 16px;">关联文件</h3>
+                            <div style="background: white; border-radius: 12px; padding: 24px;">
+                                <div style="margin-bottom: 16px;">
+                                    <button class="btn btn-primary">关联文件</button>
+                                </div>
+                                <div class="table-container">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>文件名</th>
+                                                <th>类型</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>产品功能说明.pdf</td>
+                                                <td>说明文档</td>
+                                                <td><span class="status-indicator active">已关联</span></td>
+                                                <td><button class="btn btn-secondary">取消关联</button></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 用户管理 -->
+                <section class="content-section" id="user-management">
+                    <div style="margin-bottom: 24px;">
+                        <button class="btn btn-primary">添加用户</button>
+                        <button class="btn btn-secondary">批量导入</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>最后登录</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>张三</td>
+                                    <td>zhangsan@example.com</td>
+                                    <td>管理员</td>
+                                    <td><span class="status-indicator active">活跃</span></td>
+                                    <td>2023-10-16 15:30</td>
+                                    <td>
+                                        <button class="btn btn-secondary">编辑</button>
+                                        <button class="btn btn-secondary">禁用</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>李四</td>
+                                    <td>lisi@example.com</td>
+                                    <td>普通用户</td>
+                                    <td><span class="status-indicator active">活跃</span></td>
+                                    <td>2023-10-16 14:20</td>
+                                    <td>
+                                        <button class="btn btn-secondary">编辑</button>
+                                        <button class="btn btn-secondary">禁用</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新建知识库模态框 -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">新建知识库</h2>
+                <button class="close-btn" id="closeModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="createForm">
+                <div class="form-group">
+                    <label class="form-label">场景名称</label>
+                    <input type="text" class="form-input" placeholder="请输入场景名称" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">场景描述</label>
+                    <textarea class="form-textarea" placeholder="请输入场景描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">知识类型</label>
+                    <div class="type-selector">
+                        <div class="type-option" data-type="faq">
+                            <svg class="type-icon" viewBox="0 0 24 24">
+                                <path d="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,10.25 15.56,11.42 14.83,12.15L15.07,11.25M11,19H13V17H11V19Z"/>
+                            </svg>
+                            <div>FAQ问答</div>
+                        </div>
+                        <div class="type-option" data-type="document">
+                            <svg class="type-icon" viewBox="0 0 24 24">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            <div>基础文档</div>
+                        </div>
+                        <div class="type-option" data-type="manual">
+                            <svg class="type-icon" viewBox="0 0 24 24">
+                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6Z"/>
+                            </svg>
+                            <div>产品手册</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">匹配关键词</label>
+                    <input type="text" class="form-input" placeholder="请输入关键词，用逗号分隔">
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">取消</button>
+                    <button type="submit" class="btn btn-primary">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 示例数据
+        const knowledgeBases = [
+            {
+                id: 1,
+                name: "产品功能FAQ",
+                description: "包含产品核心功能的常见问题解答，帮助用户快速了解系统功能。",
+                type: "faq",
+                tags: ["产品功能", "用户指南", "常见问题"],
+                createdAt: "2023-10-16",
+                status: "active"
+            },
+            {
+                id: 2,
+                name: "技术文档库",
+                description: "系统技术架构、API文档、开发指南等技术相关文档集合。",
+                type: "document",
+                tags: ["技术文档", "API", "开发指南"],
+                createdAt: "2023-10-15",
+                status: "active"
+            },
+            {
+                id: 3,
+                name: "XLoop产品手册",
+                description: "XLoop知识库管理系统的完整产品手册，包含功能说明和操作指南。",
+                type: "manual",
+                tags: ["产品手册", "操作指南", "功能说明"],
+                createdAt: "2023-10-14",
+                status: "active"
+            },
+            {
+                id: 4,
+                name: "客服话术库",
+                description: "客服人员常用话术和标准回复模板，提升客服效率和服务质量。",
+                type: "faq",
+                tags: ["客服话术", "标准回复", "服务质量"],
+                createdAt: "2023-10-13",
+                status: "active"
+            }
+        ];
+
+        // DOM元素
+        const navItems = document.querySelectorAll('.nav-item');
+        const contentSections = document.querySelectorAll('.content-section');
+        const pageTitle = document.getElementById('pageTitle');
+        const createBtn = document.getElementById('createBtn');
+        const createModal = document.getElementById('createModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const createForm = document.getElementById('createForm');
+        const knowledgeGrid = document.getElementById('knowledgeGrid');
+        const searchInput = document.getElementById('searchInput');
+        const typeOptions = document.querySelectorAll('.type-option');
+
+        // 页面标题映射
+        const pageTitles = {
+            'knowledge-list': '知识库列表',
+            'document-management': '基础文档管理',
+            'faq-management': 'FAQ管理',
+            'manual-management': '产品手册管理',
+            'user-management': '用户管理'
+        };
+
+        // 导航切换
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // 移除所有活跃状态
+                navItems.forEach(nav => nav.classList.remove('active'));
+                contentSections.forEach(section => section.classList.remove('active'));
+                
+                // 添加活跃状态
+                item.classList.add('active');
+                const sectionId = item.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+                
+                // 更新页面标题
+                pageTitle.textContent = pageTitles[sectionId];
+            });
+        });
+
+        // 渲染知识库卡片
+        function renderKnowledgeCards(data = knowledgeBases) {
+            knowledgeGrid.innerHTML = '';
+            
+            data.forEach(kb => {
+                const card = document.createElement('div');
+                card.className = 'knowledge-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="card-type ${kb.type}">${getTypeLabel(kb.type)}</span>
+                        <div class="card-menu">
+                            <button class="menu-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <h3 class="card-title">${kb.name}</h3>
+                    <p class="card-description">${kb.description}</p>
+                    <div class="card-tags">
+                        ${kb.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="card-meta">
+                        <span>创建时间: ${kb.createdAt}</span>
+                        <span class="status-indicator ${kb.status}">${kb.status === 'active' ? '启用' : '禁用'}</span>
+                    </div>
+                `;
+                knowledgeGrid.appendChild(card);
+            });
+        }
+
+        // 获取类型标签
+        function getTypeLabel(type) {
+            const labels = {
+                'faq': 'FAQ问答',
+                'document': '基础文档',
+                'manual': '产品手册'
+            };
+            return labels[type] || type;
+        }
+
+        // 搜索功能
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = knowledgeBases.filter(kb => 
+                kb.name.toLowerCase().includes(query) ||
+                kb.description.toLowerCase().includes(query) ||
+                kb.tags.some(tag => tag.toLowerCase().includes(query))
+            );
+            renderKnowledgeCards(filtered);
+        });
+
+        // 模态框控制
+        createBtn.addEventListener('click', () => {
+            createModal.classList.add('show');
+        });
+
+        closeModal.addEventListener('click', () => {
+            createModal.classList.remove('show');
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            createModal.classList.remove('show');
+        });
+
+        // 点击模态框背景关闭
+        createModal.addEventListener('click', (e) => {
+            if (e.target === createModal) {
+                createModal.classList.remove('show');
+            }
+        });
+
+        // 类型选择
+        typeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                typeOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        // 表单提交
+        createForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // 这里可以添加表单验证和提交逻辑
+            alert('知识库创建成功！');
+            createModal.classList.remove('show');
+            createForm.reset();
+            typeOptions.forEach(opt => opt.classList.remove('selected'));
+        });
+
+        // 文件上传区域
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                alert(`已选择 ${files.length} 个文件，开始上传...`);
+            }
+        });
+
+        // 全选功能
+        const selectAll = document.getElementById('selectAll');
+        selectAll.addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('#documentTable input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+            });
+        });
+
+        // 初始化页面
+        renderKnowledgeCards();
+
+        // 响应式菜单切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // 添加移动端菜单按钮（如果需要）
+        if (window.innerWidth <= 768) {
+            const menuBtn = document.createElement('button');
+            menuBtn.innerHTML = '☰';
+            menuBtn.style.cssText = 'position: fixed; top: 20px; left: 20px; z-index: 1001; background: #2563eb; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;';
+            menuBtn.addEventListener('click', toggleSidebar);
+            document.body.appendChild(menuBtn);
+        }
+    </script>
+</body>
+</html>
+
