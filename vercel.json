@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "xloop_prototype.html",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/",
+            "dest": "/xloop_prototype.html"
+        }
+    ]
+}
